@@ -56,7 +56,7 @@ def on_message(ws, message):
         levelno = d['levelno']
         module = d['module']
         myfuncName = str(d['funcName'])
-        exc_info = d['exc_info']
+        exc_info = d.get('exc_info')
         lineno = str(d['lineno'])
 
         color = 'green'
@@ -68,7 +68,7 @@ def on_message(ws, message):
             color = 'yellow'
 
 #        t = "%s%s%s.py:%s:%s #%s" %(
-        s1 = '{0} {1}:{2}:{3}{4} {5} {6}'.format(
+        s2 = '{0} {1}:{2}:{3}{4} {5} {6}'.format(
                 colored('{:>12}'.format(created), 'magenta'),
                 colored("%s.py"%module, 'green'),
                 colored(myfuncName, 'cyan'),
@@ -76,8 +76,12 @@ def on_message(ws, message):
                 colored(lineno, 'yellow'),
                 colored(">", 'magenta'),
                 colored(msg, 'yellow'))
-        s2 = colored('{:11}'.format("[%s]"%level), color)
-        print '%s%s' %(s2,s1)
+        s1 = colored('{:11}'.format("[%s]"%level), color)
+        if exc_info:
+            s3 = "\n%s" % (colored(exc_info, 'red'))
+        else:
+            s3=""
+        print '%s%s%s' %(s1,s2, s3)
     except Exception, e:
         print e
 
@@ -106,11 +110,8 @@ def on_open(ws):
         print("Thread terminating...")
 
     thread.start_new_thread(run, ())
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        host = "ws://localhost:8889/ws"
-    else:
-        host = sys.argv[1]
+def main():
+    host = "ws://localhost:8889/ws"
     msg = "### WS connecting to %s ###" %host
     print colored(msg, 'yellow')
     loading.start()
@@ -121,3 +122,5 @@ if __name__ == "__main__":
 
     ws.on_open = on_open
     ws.run_forever()
+if __name__ == "__main__":
+    main()
